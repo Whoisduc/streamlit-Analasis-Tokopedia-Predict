@@ -4,167 +4,248 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # ========================
-# KONFIGURASI HALAMAN
+# PAGE CONFIG
 # ========================
-st.title("TIM FUBUKI\n 1. M.Nur Alfiansyah (2371020139) \n 2. Sultan Muliya Pratama (2371020152)")
-
-st.set_page_config(
-    layout="wide",
-    page_title="Dashboard Analisis Tokopedia - PRDECT-ID"
-)
-
-st.title("Dashboard Analisis Produk & Review Tokopedia (PRDECT-ID Dataset)")
+st.set_page_config(page_title="Dashboard Tokopedia", layout="wide")
 
 # ========================
-# LOAD DATASET
+# CUSTOM CSS – FUTURISTIC GLOW DARK MODE + PLACEHOLDER INDONESIA
+# ========================
+st.markdown("""
+<style>
+
+/* MAIN BACKGROUND */
+.block-container {
+    background: #0d0d0f;
+    padding: 2rem 2.5rem;
+}
+
+/* TEXT COLOR */
+h1, h2, h3, h4, p, div, label, span {
+    color: #e6e6e6 !important;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* GLOW CARD */
+.glow-card {
+    background: rgba(20, 20, 30, 0.55);
+    backdrop-filter: blur(8px);
+    padding: 18px 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(120, 120, 255, 0.25);
+    box-shadow: 0 0 12px rgba(140, 0, 255, 0.25);
+    margin-bottom: 18px;
+}
+
+/* TITLE BOX */
+.glow-title {
+    background: linear-gradient(90deg, rgba(140,0,255,0.4), rgba(0,150,255,0.4));
+    padding: 22px 30px;
+    border-radius: 15px;
+    margin-top: 30px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(200,200,255,0.2);
+    box-shadow: 0 0 25px rgba(140,0,255,0.4);
+}
+
+.glow-title h1 {
+    color: white !important;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.subtext {
+    color: #dcdcdc !important;
+    opacity: 0.85;
+}
+
+/* TAB STYLE */
+div[role="tablist"] {
+    background: rgba(40,40,60,0.4);
+    border-radius: 12px;
+    padding: 8px;
+}
+
+div[role="tab"] {
+    color: white !important;
+    font-weight: 600;
+}
+
+/* CUSTOM PLACEHOLDER INDONESIA UNTUK MULTISELECT */
+div[data-baseweb="select"] input::placeholder {
+    color: #bbbbbb !important;
+    opacity: 0.85;
+    font-style: italic;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(120,120,255,0.4);
+    border-radius: 10px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ========================
+# HEADER
+# ========================
+st.markdown("""
+<div class="glow-title">
+    <h1>DASHBOARD TOKOPEDIA</h1>
+    <p class="subtext">Analisis Produk & Review • PRDECT-ID Dataset (500 baris)</p>
+    <h1>TIM FUBUKI</h1>
+    <p class="subtext">1. M.Nur Alfiansyah (2371020139)</p>
+    <p class="subtext">2. Sultan Muliya Pratama (2371020152)</p>
+</div>
+""", unsafe_allow_html=True)
+
+# ========================
+# LOAD DATA
 # ========================
 @st.cache_data
 def load_data():
-    df = pd.read_excel("PRDECT-ID Dataset_500.xlsx")
-    return df
+    return pd.read_excel("PRDECT-ID Dataset_500.xlsx")
 
 df = load_data()
 
 # ========================
-# SIDEBAR FILTERS
+# SIDEBAR FILTER (MULTISELECT + PLACEHOLDER)
 # ========================
-st.sidebar.header("Filter Data")
+st.sidebar.markdown("<h2 style='color:#9d4dff;'>FILTER DATA</h2>", unsafe_allow_html=True)
 
-# Filter kategori
-categories = ["All"] + sorted(df["Category"].unique().tolist())
-selected_category = st.sidebar.selectbox("Pilih Kategori Produk:", categories)
+categories = st.sidebar.multiselect(
+    "Pilih Kategori Produk:",
+    sorted(df["Category"].unique().tolist()),
+    placeholder="Pilih kategori"
+)
 
-# Filter lokasi
-locations = ["All"] + sorted(df["Location"].unique().tolist())
-selected_location = st.sidebar.selectbox("Pilih Lokasi Penjual:", locations)
+locations = st.sidebar.multiselect(
+    "Pilih Lokasi Penjual:",
+    sorted(df["Location"].unique().tolist()),
+    placeholder="Pilih lokasi"
+)
 
-# Filter sentimen
-sentiments = ["All"] + sorted(df["Sentiment"].unique().tolist())
-selected_sentiment = st.sidebar.selectbox("Pilih Sentimen Review:", sentiments)
+sentiments = st.sidebar.multiselect(
+    "Pilih Sentimen Review:",
+    sorted(df["Sentiment"].unique().tolist()),
+    placeholder="Pilih sentimen"
+)
 
-# Filter emosi (Emotion)
-emotions = ["All"] + sorted(df["Emotion"].unique().tolist())
-selected_emotion = st.sidebar.selectbox("Pilih Emosi Pelanggan:", emotions)
+emotions = st.sidebar.multiselect(
+    "Pilih Emosi Pelanggan:",
+    sorted(df["Emotion"].unique().tolist()),
+    placeholder="Pilih emosi"
+)
 
 # ========================
-# APPLY FILTERS
+# APPLY FILTER (MULTISELECT)
 # ========================
 filtered_df = df.copy()
 
-if selected_category != "All":
-    filtered_df = filtered_df[filtered_df["Category"] == selected_category]
+if categories:
+    filtered_df = filtered_df[filtered_df["Category"].isin(categories)]
 
-if selected_location != "All":
-    filtered_df = filtered_df[filtered_df["Location"] == selected_location]
+if locations:
+    filtered_df = filtered_df[filtered_df["Location"].isin(locations)]
 
-if selected_sentiment != "All":
-    filtered_df = filtered_df[filtered_df["Sentiment"] == selected_sentiment]
+if sentiments:
+    filtered_df = filtered_df[filtered_df["Sentiment"].isin(sentiments)]
 
-if selected_emotion != "All":
-    filtered_df = filtered_df[filtered_df["Emotion"] == selected_emotion]
-
-# ========================
-# RINGKASAN DATA
-# ========================
-st.subheader("Ringkasan Data Setelah Filter")
-
-col1, col2, col3 = st.columns(3)
-
-# Jumlah produk
-col1.metric("Jumlah Produk", len(filtered_df))
-
-# Rata-rata harga
-avg_price = filtered_df["Price"].mean()
-if np.isnan(avg_price):
-    col2.metric("Rata-rata Harga", "Tidak Ada Data")
-else:
-    col2.metric("Rata-rata Harga", f"Rp {int(avg_price):,}")
-
-# Rata-rata rating
-avg_rating = filtered_df["Customer Rating"].mean()
-if np.isnan(avg_rating):
-    col3.metric("Rata-rata Rating", "Tidak Ada Data")
-else:
-    col3.metric("Rata-rata Rating", round(avg_rating, 2))
+if emotions:
+    filtered_df = filtered_df[filtered_df["Emotion"].isin(emotions)]
 
 # ========================
-# STATISTIK DESKRIPTIF
+# TABS
 # ========================
-st.subheader("Statistik Deskriptif")
-
-if not filtered_df.empty:
-    numeric_cols = ["Price", "Overall Rating", "Number Sold", "Total Review", "Customer Rating"]
-
-    # Hitung statistik
-    mean_vals = filtered_df[numeric_cols].mean()
-    median_vals = filtered_df[numeric_cols].median()
-    std_vals = filtered_df[numeric_cols].std()
-    mode_vals = filtered_df[numeric_cols].mode().iloc[0]
-
-    # Tabel statistik
-    stats_df = pd.DataFrame({
-        "Mean": mean_vals,
-        "Median": median_vals,
-        "Modus": mode_vals,
-        "Std Dev": std_vals
-    })
-
-    st.dataframe(stats_df)
-
-    # Histogram harga (distribusi data)
-    st.subheader("Distribusi Harga Produk (Histogram)")
-    fig_hist, ax_hist = plt.subplots(figsize=(8, 4))
-    ax_hist.hist(filtered_df["Price"], bins=30, edgecolor='black')
-    ax_hist.set_xlabel("Harga Produk")
-    ax_hist.set_ylabel("Frekuensi")
-    ax_hist.set_title("Distribusi Harga Produk")
-    st.pyplot(fig_hist)
-
-else:
-    st.info("Statistik tidak dapat ditampilkan karena data kosong akibat filter.")
-
-# Kalau tidak ada data sama sekali setelah filter, jangan gambar grafik lain
-if filtered_df.empty:
-    st.warning("Tidak ada data untuk kombinasi filter yang dipilih. Silakan ubah filter di sidebar.")
-else:
-    # ========================
-    # GRAPH 1 – Bar Chart Category
-    # ========================
-    st.subheader("Jumlah Produk per Kategori")
-
-    fig1, ax1 = plt.subplots(figsize=(8, 4))
-    filtered_df["Category"].value_counts().plot(kind="bar", ax=ax1)
-    ax1.set_xlabel("Kategori")
-    ax1.set_ylabel("Jumlah")
-    ax1.set_title("Distribusi Produk per Kategori")
-    plt.xticks(rotation=45, ha="right")
-    st.pyplot(fig1)
-
-    # ========================
-    # GRAPH 2 – Pie Chart Sentiment
-    # ========================
-    st.subheader("Distribusi Sentimen Pelanggan")
-
-    fig2, ax2 = plt.subplots(figsize=(6, 6))
-    filtered_df["Sentiment"].value_counts().plot(kind="pie", autopct="%1.1f%%", ax=ax2)
-    ax2.set_ylabel("")
-    ax2.set_title("Proporsi Sentimen Review")
-    st.pyplot(fig2)
-
-    # ========================
-    # GRAPH 3 – Scatter Plot Price vs Number Sold
-    # ========================
-    st.subheader("Scatter Plot: Harga vs Jumlah Terjual")
-
-    fig3, ax3 = plt.subplots(figsize=(8, 5))
-    ax3.scatter(filtered_df["Price"], filtered_df["Number Sold"])
-    ax3.set_xlabel("Harga Produk (Price)")
-    ax3.set_ylabel("Jumlah Terjual (Number Sold)")
-    ax3.set_title("Hubungan Harga dan Jumlah Terjual")
-    st.pyplot(fig3)
+tab1, tab2, tab3 = st.tabs(["📊 Statistik Ringkas", "📈 Visualisasi", "📋 Data Detail"])
 
 # ========================
-# DATA TABLE
+# TAB 1 – STATISTIK
 # ========================
-st.subheader("Data Produk & Review (Setelah Filter)")
-st.dataframe(filtered_df.reset_index(drop=True))
+with tab1:
+
+    st.markdown("<h2 style='color:#a970ff;'>📊 Statistik Ringkas</h2>", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.markdown(f"""
+    <div class="glow-card">
+        <h3>Jumlah Produk</h3>
+        <h1>{len(filtered_df)}</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+    avg_price = filtered_df["Price"].mean()
+    price_display = "Tidak Ada Data" if np.isnan(avg_price) else f"Rp {int(avg_price):,}"
+
+    col2.markdown(f"""
+    <div class="glow-card">
+        <h3>Rata-rata Harga</h3>
+        <h1>{price_display}</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+    avg_rating = filtered_df["Customer Rating"].mean()
+    rating_display = "Tidak Ada Data" if np.isnan(avg_rating) else round(avg_rating, 2)
+
+    col3.markdown(f"""
+    <div class="glow-card">
+        <h3>Rata-rata Rating</h3>
+        <h1>{rating_display}</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<h2 style='color:#a970ff;'>📘 Statistik Deskriptif</h2>", unsafe_allow_html=True)
+
+    if not filtered_df.empty:
+        numeric_cols = ["Price", "Overall Rating", "Number Sold", "Total Review", "Customer Rating"]
+        stats_df = pd.DataFrame({
+            "Mean": filtered_df[numeric_cols].mean(),
+            "Median": filtered_df[numeric_cols].median(),
+            "Mode": filtered_df[numeric_cols].mode().iloc[0],
+            "Std Dev": filtered_df[numeric_cols].std()
+        })
+        st.dataframe(stats_df)
+    else:
+        st.info("Tidak ada data setelah filter diterapkan.")
+
+# ========================
+# TAB 2 – VISUALISASI
+# ========================
+with tab2:
+
+    if filtered_df.empty:
+        st.warning("Tidak ada data untuk divisualisasikan. Ubah filter di sidebar.")
+    else:
+        st.markdown("<h2 style='color:#a970ff;'>📈 Visualisasi Data</h2>", unsafe_allow_html=True)
+
+        colA, colB = st.columns(2)
+
+        with colA:
+            st.markdown("<div class='glow-card'><h3>Kategori Produk</h3></div>", unsafe_allow_html=True)
+            fig1, ax1 = plt.subplots(figsize=(6,4))
+            filtered_df["Category"].value_counts().plot(kind="bar", color="#a970ff", ax=ax1)
+            st.pyplot(fig1)
+
+        with colB:
+            st.markdown("<div class='glow-card'><h3>Sentimen Pelanggan</h3></div>", unsafe_allow_html=True)
+            fig2, ax2 = plt.subplots(figsize=(6,4))
+            filtered_df["Sentiment"].value_counts().plot(kind="pie", autopct="%1.1f%%", ax=ax2)
+            st.pyplot(fig2)
+
+        st.markdown("<div class='glow-card'><h3>Harga vs Jumlah Terjual</h3></div>", unsafe_allow_html=True)
+        fig3, ax3 = plt.subplots(figsize=(8,4))
+        ax3.scatter(filtered_df["Price"], filtered_df["Number Sold"], color="#00d4ff")
+        st.pyplot(fig3)
+
+# ========================
+# TAB 3 – DATA DETAIL
+# ========================
+with tab3:
+    st.markdown("<h2 style='color:#a970ff;'>📋 Data Produk & Review</h2>", unsafe_allow_html=True)
+    st.dataframe(filtered_df.reset_index(drop=True))
