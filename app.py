@@ -251,7 +251,7 @@ with tab1:
         stats_df = pd.DataFrame({
             "Mean": filtered_df[numeric_cols].mean(),
             "Median": filtered_df[numeric_cols].median(),
-            "Mode": filtered_df[numeric_cols].mode().iloc[0],
+            "Modus": filtered_df[numeric_cols].mode().iloc[0],
             "Std Dev": filtered_df[numeric_cols].std()
         })
         st.dataframe(stats_df)
@@ -310,6 +310,26 @@ with tab2:
             for j in range(len(numeric_cols)):
                 ax_corr.text(j, i, f"{corr.values[i, j]:.2f}", ha="center", va="center", color="white", fontsize=8)
         st.pyplot(fig_corr)
+
+        # Line Chart – Rata-rata Jumlah Terjual per Kategori
+        st.markdown("<div class='glow-card'><h3>Rata-rata Jumlah Terjual per Kategori (Line Chart)</h3></div>", unsafe_allow_html=True)
+        if not filtered_df["Category"].empty:
+            category_sold = (
+                filtered_df
+                .groupby("Category")["Number Sold"]
+                .mean()
+                .sort_values(ascending=False)
+            )
+
+            fig_line, ax_line = plt.subplots(figsize=(8, 4))
+            ax_line.plot(category_sold.index, category_sold.values, marker="o")
+            ax_line.set_xlabel("Kategori")
+            ax_line.set_ylabel("Rata-rata Jumlah Terjual")
+            ax_line.set_title("Rata-rata Jumlah Terjual per Kategori")
+            plt.setp(ax_line.get_xticklabels(), rotation=45, ha="right")
+            st.pyplot(fig_line)
+        else:
+            st.info("Tidak ada kategori yang dapat ditampilkan untuk line chart.")
 
         # Top 10 Produk Terlaris
         st.markdown("<div class='glow-card'><h3>Top 10 Produk Terlaris (Berdasarkan Jumlah Terjual)</h3></div>", unsafe_allow_html=True)
