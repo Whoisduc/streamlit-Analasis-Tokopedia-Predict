@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # ========================
 # PAGE CONFIG
 # ========================
-st.set_page_config(page_title="Dashboard Futuristic Glow", layout="wide")
+st.set_page_config(page_title="Dashboard Tokopedia", layout="wide")
 
 # ========================
 # CUSTOM CSS – FUTURISTIC GLOW DARK MODE + PLACEHOLDER INDONESIA
@@ -96,7 +96,7 @@ div[data-baseweb="select"] input::placeholder {
 # ========================
 st.markdown("""
 <div class="glow-title">
-    <h1>DASHBOARD TOKOPEDIA – FUTURISTIC GLOW</h1>
+    <h1>DASHBOARD TOKOPEDIA</h1>
     <p class="subtext">Analisis Produk & Review • PRDECT-ID Dataset (500 baris)</p>
     <h1>TIM FUBUKI</h1>
     <p class="subtext">1. M.Nur Alfiansyah (2371020139)</p>
